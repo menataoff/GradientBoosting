@@ -96,3 +96,5 @@ public:
         return softmax(raw);
     }
 };
+
+//TODO: US кроссэнтропию
