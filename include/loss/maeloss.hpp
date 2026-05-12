@@ -4,7 +4,7 @@
 #include <numeric>
 #include <algorithm>
 
-class MAELoss : public LossFunction {
+class MAELoss : public LossFunction<double> {
 public:
     MAELoss(double lr) : LossFunction(lr, 1) {}
 

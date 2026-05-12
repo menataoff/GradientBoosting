@@ -3,7 +3,7 @@
 #include "lossfunction.hpp"
 #include <numeric>
 
-class MSELoss : public LossFunction {
+class MSELoss : public LossFunction<double> {
 public:
     MSELoss(double lr) : LossFunction(lr, 1) {}
 
