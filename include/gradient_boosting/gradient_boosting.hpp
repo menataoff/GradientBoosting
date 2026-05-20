@@ -27,10 +27,23 @@ protected:
     int min_samples_split;
     int min_samples_leaf;
     std::unique_ptr<LossFunction<Type>> loss;
-    std::string loss_str;
+public:
+    GradientBoosting(
+        int n_estimators_val = 128,
+        double learning_rate = 0.01,
+        int max_depth_val = 8,
+        int min_samples_split_val = 3,
+        int min_samples_leaf_val = 2) :
+    n_estimators(n_estimators_val),
+    lr(learning_rate),
+    max_depth(max_depth_val),
+    min_samples_split(min_samples_split_val),
+    min_samples_leaf(min_samples_leaf_val) {}
+
+    virtual ~GradientBoosting() = default;
 
     void fit_impl(const std::vector<std::vector<double>>& X,
-              const std::vector<Type>& y) {
+             const std::vector<Type>& y) {
 
         auto& derived = static_cast<Derived&>(*this);
 
@@ -52,22 +65,6 @@ protected:
             loss->update_predictions(current_pred, tree_pred);
         }
     }
-public:
-    GradientBoosting(
-        int n_estimators_val = 128,
-        double learning_rate = 0.01,
-        int max_depth_val = 8,
-        int min_samples_split_val = 3,
-        int min_samples_leaf_val = 2,
-        const std::string& loss_str_val = "mse") :
-    n_estimators(n_estimators_val),
-    lr(learning_rate),
-    max_depth(max_depth_val),
-    min_samples_split(min_samples_split_val),
-    min_samples_leaf(min_samples_leaf_val),
-    loss_str(loss_str_val) {}
-
-    virtual ~GradientBoosting() = default;
 
     virtual void fit(const std::vector<std::vector<double>>& X,
                      const std::vector<Type>& y) = 0;
