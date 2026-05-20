@@ -28,6 +28,30 @@ protected:
     int min_samples_leaf;
     std::unique_ptr<LossFunction<Type>> loss;
     std::string loss_str;
+
+    void fit_impl(const std::vector<std::vector<double>>& X,
+              const std::vector<Type>& y) {
+
+        auto& derived = static_cast<Derived&>(*this);
+
+        // 1. Инициализация
+        auto current_pred = derived.initialize_predictions(y);
+
+        // 2. Цикл обучения
+        for (int iter = 0; iter < n_estimators; ++iter) {
+            // 2.1 Градиенты
+            auto residuals = loss->gradient(y, current_pred);
+
+            // 2.2 Обучаем деревья (специфика наследника)
+            derived.fit_iteration(X, residuals, iter);
+
+            // 2.3 Получаем предсказания (специфика наследника)
+            auto tree_pred = derived.get_last_predictions(X);
+
+            // 2.4 Обновляем предсказания (ОБЩАЯ ЛОГИКА из LossFunction!)
+            loss->update_predictions(current_pred, tree_pred);
+        }
+    }
 public:
     GradientBoosting(
         int n_estimators_val = 128,
@@ -41,13 +65,12 @@ public:
     max_depth(max_depth_val),
     min_samples_split(min_samples_split_val),
     min_samples_leaf(min_samples_leaf_val),
-    loss_str(loss_str_val) {
-        static const std::unordered_map<std::string, std::function<std::unique_ptr<LossFunction<Type>>(double)>> factory = {
-            {"mse", [](double lr) { return std::make_unique<MSELoss>(lr); }},
-            {"mae", [](double lr) { return std::make_unique<MAELoss>(lr); }},
-            {"crossentropy", [](double lr) { return std::make_unique<CrossEntropyLoss>(lr); }},
-        };
-    }
+    loss_str(loss_str_val) {}
 
+    virtual ~GradientBoosting() = default;
+
+    virtual void fit(const std::vector<std::vector<double>>& X,
+                     const std::vector<Type>& y) = 0;
+    virtual Type predict(const std::vector<double>& x) const = 0;
 };
 //TODO: Логику выбора лосса. Сделать так, чтобы разрешились зависимости, не делать миллион include "...hpp"
