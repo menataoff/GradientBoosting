@@ -1,11 +1,14 @@
 #pragma once
 
 #include "../loss/lossfunction.hpp"
+#include "../loss/mseloss.hpp"
+#include "../loss/maeloss.hpp"
+#include "../loss/crossentropyloss.hpp"
 #include <numeric>
 #include <memory>
 #include <string>
 #include <unordered_map>
-
+#include <functional>
 // template<typename TargetType>
 // struct DataPoint {
 //     std::vector<double> features;
@@ -28,11 +31,13 @@ protected:
 public:
     GradientBoosting(
         int n_estimators_val = 128,
+        double learning_rate = 0.01,
         int max_depth_val = 8,
         int min_samples_split_val = 3,
         int min_samples_leaf_val = 2,
         const std::string& loss_str_val = "mse") :
     n_estimators(n_estimators_val),
+    lr(learning_rate),
     max_depth(max_depth_val),
     min_samples_split(min_samples_split_val),
     min_samples_leaf(min_samples_leaf_val),
@@ -40,7 +45,7 @@ public:
         static const std::unordered_map<std::string, std::function<std::unique_ptr<LossFunction<Type>>(double)>> factory = {
             {"mse", [](double lr) { return std::make_unique<MSELoss>(lr); }},
             {"mae", [](double lr) { return std::make_unique<MAELoss>(lr); }},
-            // {"huber", [](double lr) { return std::make_unique<HuberLoss>(lr); }},  // если добавишь
+            {"crossentropy", [](double lr) { return std::make_unique<CrossEntropyLoss>(lr); }},
         };
     }
 
